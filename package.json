@@ -1,9 +1,9 @@
 {
-  "name": "devnote",
-  "displayName": "DevNote",
+  "name": "DevNotePro",
+  "displayName": "DevNote Pro",
   "description": "Attach rich notes to any line of code",
-  "version": "0.1.0",
-  "publisher": "mortezadalil",
+  "version": "0.1.1",
+  "publisher": "MortezaDalil",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -27,6 +27,7 @@
   "categories": ["Other"],
   "activationEvents": ["onStartupFinished"],
   "main": "./out/extension.js",
+  "icon": "media/store-icon.png",
   "contributes": {
     "commands": [
       {

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./devNote.png" alt="DevNote — Notes in your code" width="640" />
+  <img src="https://raw.githubusercontent.com/mortezadalil/DevNote/main/devNote.jpg" alt="DevNote — Notes in your code" width="640" />
 </p>
 
 <h1 align="center">DevNote</h1>
@@ -59,7 +59,12 @@
 
 ### From the Marketplace
 
-When the extension is published, search for **DevNote** in the Extensions view (`devnote`, publisher `mortezadalil`) and click **Install**.
+**DevNote Pro** is published as **`MortezaDalil.DevNotePro`**.
+
+- **Open in browser:** [DevNote Pro on Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=MortezaDalil.DevNotePro)
+- **In VS Code / Cursor:** Extensions (`Ctrl+Shift+X` / `⌘⇧X`) → search **DevNote Pro** or **MortezaDalil** → **Install**.
+
+> The internal marketplace id is `DevNotePro` because the short name `devnote` was already taken globally on the Marketplace.
 
 ## Requirements
 
