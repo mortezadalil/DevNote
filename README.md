@@ -11,6 +11,8 @@
   ·
   <a href="https://github.com/mortezadalil/DevNote/issues">Issues</a>
   ·
+  <a href="#how-to-use">How to use</a>
+  ·
   <a href="#installation">Install</a>
   ·
   <a href="#quick-start">Quick start</a>
@@ -18,10 +20,17 @@
 
 ---
 
-**DevNote** is a [Visual Studio Code](https://code.visualstudio.com/) extension that lets you attach **rich notes** (Markdown-style text and **images**) to **specific lines** in your project. Notes are stored in your workspace so they stay with the codebase—ideal for design decisions, TODOs, reviews, and documentation that belongs next to the code.
+## How to use
+
+1. **Select** a portion of code in the editor, then **create a note** for that selection. DevNote remembers the file, line, and snippet so the note stays anchored to that code.
+2. Whenever you need context again, **open the Notes list** in the sidebar, **find** the note, and **navigate** back to the exact code to read or edit what you wrote.
+3. Notes support **Markdown-style text** and **images**—paste or add pictures so diagrams and screenshots sit beside the code they refer to.
+
+**DevNote** is a [Visual Studio Code](https://code.visualstudio.com/) extension that attaches these rich notes to **specific lines** in your project. Notes are stored in your workspace so they stay with the codebase—ideal for design decisions, TODOs, reviews, and documentation that belongs next to the code.
 
 ## Table of contents
 
+- [How to use](#how-to-use)
 - [Features](#features)
 - [Installation](#installation)
 - [Requirements](#requirements)
