@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
 import type { DecorationProvider } from './decorationProvider';
+import { resolveNoteFileAbsolutePath } from './resolveNoteFilePath';
 
 /**
  * Opens the workspace file (if needed), reveals the note line, flashes it briefly, refreshes gutter.
@@ -13,7 +13,15 @@ export async function revealNoteAnchorInWorkspace(
   decorationProvider: DecorationProvider
 ): Promise<void> {
   try {
-    const uri = vscode.Uri.file(path.join(workspaceRoot, fileRelativePath));
+    const absolute = resolveNoteFileAbsolutePath(workspaceRoot, fileRelativePath);
+    if (!absolute) {
+      await vscode.window.showErrorMessage(
+        `DevNote: file not found for "${fileRelativePath}". ` +
+          'Try opening the same workspace folder as when the note was created.'
+      );
+      return;
+    }
+    const uri = vscode.Uri.file(absolute);
     const doc = await vscode.workspace.openTextDocument(uri);
     const editor = await vscode.window.showTextDocument(doc, { preview: false });
     await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');

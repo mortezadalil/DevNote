@@ -3,6 +3,7 @@ import * as path from 'path';
 import { NoteManager, Note } from './noteManager';
 import { DecorationProvider } from './decorationProvider';
 import { openNoteImage } from './openNoteImage';
+import { resolveNoteFileAbsolutePath } from './resolveNoteFilePath';
 
 interface PanelInput {
   filePath: string;
@@ -124,11 +125,13 @@ export class NoteWebviewPanel {
             // Navigate to the noted line
             const ws = noteManager.getWorkspaceRoot();
             if (ws) {
-              const uri = vscode.Uri.file(path.join(ws, note.fileRelativePath));
-              const doc = await vscode.workspace.openTextDocument(uri);
-              const ed = await vscode.window.showTextDocument(doc);
-              const pos = new vscode.Position(note.line, 0);
-              ed.revealRange(new vscode.Range(pos, pos), vscode.TextEditorRevealType.InCenter);
+              const abs = resolveNoteFileAbsolutePath(ws, note.fileRelativePath);
+              if (abs) {
+                const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(abs));
+                const ed = await vscode.window.showTextDocument(doc);
+                const pos = new vscode.Position(note.line, 0);
+                ed.revealRange(new vscode.Range(pos, pos), vscode.TextEditorRevealType.InCenter);
+              }
             }
             break;
           }
@@ -136,10 +139,12 @@ export class NoteWebviewPanel {
             this.panel.dispose();
             const ws = noteManager.getWorkspaceRoot();
             if (ws) {
-              const uri = vscode.Uri.file(path.join(ws, input.filePath));
-              vscode.workspace.openTextDocument(uri).then(doc => {
-                vscode.window.showTextDocument(doc, { preview: false });
-              });
+              const abs = resolveNoteFileAbsolutePath(ws, input.filePath);
+              if (abs) {
+                vscode.workspace.openTextDocument(vscode.Uri.file(abs)).then(doc => {
+                  vscode.window.showTextDocument(doc, { preview: false });
+                });
+              }
             }
             break;
           }

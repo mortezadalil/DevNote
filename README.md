@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/mortezadalil/DevNote/main/devNote.jpg" alt="DevNote — Notes in your code" width="640" />
+  <img src="https://raw.githubusercontent.com/mortezadalil/DevNote/main/devNote.jpg" alt="DevNote — Notes in your code" width="200" />
 </p>
 
 <h1 align="center">DevNote</h1>

@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
+import { workspaceRelativePathsMatch } from './resolveNoteFilePath';
 
 export interface Note {
   id: string;
@@ -78,13 +79,25 @@ export class NoteManager {
   }
 
   getNotesForFile(filePath: string): Note[] {
-    return this.config.notes.filter(n => n.fileRelativePath === filePath);
+    const root = this.getWorkspaceRoot();
+    if (!root) {
+      return this.config.notes.filter(n => n.fileRelativePath === filePath);
+    }
+    return this.config.notes.filter(n =>
+      workspaceRelativePathsMatch(root, n.fileRelativePath, filePath)
+    );
   }
 
   /** All notes anchored to this exact line (there may be more than one after “Write Note”). */
   getNotesAtLine(filePath: string, line: number): Note[] {
+    const root = this.getWorkspaceRoot();
+    if (!root) {
+      return this.config.notes.filter(
+        n => n.fileRelativePath === filePath && n.line === line
+      );
+    }
     return this.config.notes.filter(
-      n => n.fileRelativePath === filePath && n.line === line
+      n => workspaceRelativePathsMatch(root, n.fileRelativePath, filePath) && n.line === line
     );
   }
 
@@ -208,7 +221,11 @@ export class NoteManager {
   // Called by onDidChangeTextDocument — shifts note lines when code is inserted/deleted
   handleDocumentChange(event: vscode.TextDocumentChangeEvent): void {
     const filePath = vscode.workspace.asRelativePath(event.document.uri);
-    const notes = this.config.notes.filter(n => n.fileRelativePath === filePath);
+    const root = this.getWorkspaceRoot();
+    if (!root) return;
+    const notes = this.config.notes.filter(n =>
+      workspaceRelativePathsMatch(root, n.fileRelativePath, filePath)
+    );
     if (notes.length === 0) return;
 
     let changed = false;
