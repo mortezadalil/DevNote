@@ -1,0 +1,311 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: var(--vscode-editor-background);
+  --fg: var(--vscode-editor-foreground);
+  --border: var(--vscode-panel-border, rgba(128,128,128,0.3));
+  --input-bg: var(--vscode-input-background);
+  --input-fg: var(--vscode-input-foreground);
+  --input-border: var(--vscode-input-border, var(--border));
+  --input-focus: var(--vscode-focusBorder);
+  --btn-primary-bg: var(--vscode-button-background);
+  --btn-primary-fg: var(--vscode-button-foreground);
+  --btn-primary-hover: var(--vscode-button-hoverBackground);
+  --btn-secondary-bg: var(--vscode-button-secondaryBackground, rgba(128,128,128,0.15));
+  --btn-secondary-fg: var(--vscode-button-secondaryForeground, var(--fg));
+  --btn-secondary-hover: var(--vscode-button-secondaryHoverBackground, rgba(128,128,128,0.25));
+  --code-bg: var(--vscode-textCodeBlock-background, rgba(128,128,128,0.1));
+  --radius: 6px;
+  --gap: 16px;
+  --font-mono: var(--vscode-editor-font-family, 'Menlo', 'Consolas', monospace);
+  --font-size-mono: var(--vscode-editor-font-size, 13px);
+}
+
+body {
+  background: rgba(0, 0, 0, 0.55);
+  color: var(--fg);
+  font-family: var(--vscode-font-family, system-ui, sans-serif);
+  font-size: var(--vscode-font-size, 13px);
+  line-height: 1.5;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.container {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+  padding: 24px 28px 28px;
+  max-width: 680px;
+  width: 100%;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.header-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--btn-primary-bg);
+  flex-shrink: 0;
+}
+
+.header-title {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* ── Code reference ── */
+.code-ref {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.code-ref-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: var(--code-bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.code-ref-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.6;
+  font-weight: 600;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.code-ref-location {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  opacity: 0.7;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.code-snippet {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-mono);
+  background: var(--code-bg);
+  padding: 12px 16px;
+  overflow-x: auto;
+  white-space: pre;
+  max-height: 160px;
+  line-height: 1.6;
+  unicode-bidi: plaintext;
+}
+
+.code-snippet[dir="rtl"] {
+  text-align: start;
+}
+
+/* ── Fields ── */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+input[type="text"],
+textarea {
+  background: var(--input-bg);
+  color: var(--input-fg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  font-size: inherit;
+  font-family: inherit;
+  width: 100%;
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.15s;
+}
+
+input[type="text"][dir="rtl"],
+textarea[dir="rtl"] {
+  text-align: start;
+}
+
+input[type="text"]:focus,
+textarea:focus {
+  border-color: var(--input-focus);
+}
+
+textarea {
+  line-height: 1.6;
+  min-height: 120px;
+}
+
+/* ── Images ── */
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.image-thumb {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  aspect-ratio: 4/3;
+  background: var(--code-bg);
+}
+
+.image-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  cursor: pointer;
+}
+
+.image-thumb .remove-btn {
+  position: absolute;
+  top: 4px;
+  inset-inline-end: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.55);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.image-thumb:hover .remove-btn {
+  opacity: 1;
+}
+
+.image-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-fg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.btn-upload svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.btn-upload:hover {
+  background: var(--btn-secondary-hover);
+}
+
+.paste-hint {
+  font-size: 11px;
+  opacity: 0.55;
+}
+
+/* ── Action buttons ── */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.btn-cancel {
+  padding: 7px 18px;
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-fg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.btn-cancel:hover {
+  background: var(--btn-secondary-hover);
+}
+
+.btn-save {
+  padding: 7px 22px;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+
+.btn-save:hover {
+  background: var(--btn-primary-hover);
+}
+
+/* drop-highlight when dragging image over page */
+body.drag-over::after {
+  content: 'Drop image here';
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  background: rgba(0,0,0,0.4);
+  color: #fff;
+  pointer-events: none;
+  z-index: 100;
+}

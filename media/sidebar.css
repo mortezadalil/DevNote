@@ -1,0 +1,418 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:               var(--vscode-sideBar-background, var(--vscode-editor-background));
+  --fg:               var(--vscode-sideBar-foreground, var(--vscode-editor-foreground));
+  --border:           var(--vscode-panel-border, rgba(128,128,128,0.2));
+  --hover-bg:         var(--vscode-list-hoverBackground);
+  --input-bg:         var(--vscode-input-background);
+  --input-fg:         var(--vscode-input-foreground);
+  --input-border:     var(--vscode-input-border, rgba(128,128,128,0.3));
+  --input-focus:      var(--vscode-focusBorder);
+  --btn-bg:           var(--vscode-button-background);
+  --btn-fg:           var(--vscode-button-foreground);
+  --btn-hover:        var(--vscode-button-hoverBackground);
+  --btn2-bg:          var(--vscode-button-secondaryBackground, rgba(128,128,128,0.15));
+  --btn2-fg:          var(--vscode-button-secondaryForeground, var(--fg));
+  --btn2-hover:       var(--vscode-button-secondaryHoverBackground, rgba(128,128,128,0.25));
+  --code-bg:          var(--vscode-textCodeBlock-background, rgba(128,128,128,0.1));
+  --radius:           4px;
+  --font-mono:        var(--vscode-editor-font-family, monospace);
+  --font-size-mono:   var(--vscode-editor-font-size, 12px);
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--vscode-font-family, system-ui, sans-serif);
+  font-size: var(--vscode-font-size, 13px);
+  line-height: 1.4;
+  overflow-x: hidden;
+}
+
+/* ── List view ───────────────────────────────────────────────────────────── */
+.file-group { margin-bottom: 2px; }
+
+.file-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  opacity: 0.65;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  text-transform: uppercase;
+}
+
+.file-header svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+.file-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-dir {
+  margin-left: auto;
+  padding-left: 6px;
+  font-size: 10px;
+  opacity: 0.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.note-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 4px 0 8px;
+  gap: 2px;
+  cursor: pointer;
+  min-height: 30px;
+}
+
+.note-item:hover { background: var(--hover-bg); }
+.note-item:hover .note-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* On hover, reserve space so title does not sit under the overlay buttons */
+.note-item:hover .note-main {
+  padding-inline-end: 48px;
+}
+
+.note-main {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 1;
+  min-width: 0;
+  padding: 5px 0;
+  padding-inline-end: 2px;
+  transition: padding-inline-end 0.12s ease;
+}
+
+/* Title block uses full row width (no reserved column for actions until hover) */
+.note-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+  align-items: stretch;
+}
+
+.note-title {
+  display: block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+}
+
+.note-line {
+  font-size: 10px;
+  opacity: 0.5;
+  font-family: var(--font-mono);
+  margin-top: 1px;
+  direction: ltr;
+  unicode-bidi: isolate;
+  width: 100%;
+}
+
+.note-title[dir="rtl"] {
+  text-align: start;
+}
+
+/* Secondary line follows title edge in RTL rows */
+.note-info--rtl .note-line {
+  text-align: end;
+}
+
+/* Edit / delete: not in document flow — only on hover (no fixed column) */
+.note-actions {
+  position: absolute;
+  inset-inline-end: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.1s;
+}
+
+.icon-btn {
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--fg);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  opacity: 0.65;
+  transition: opacity 0.1s, background 0.1s;
+}
+
+.icon-btn:hover { opacity: 1; background: var(--hover-bg); }
+.icon-btn svg { width: 13px; height: 13px; }
+.delete-btn:hover { color: var(--vscode-errorForeground, #e05); }
+
+.empty-state {
+  padding: 28px 16px;
+  text-align: center;
+  opacity: 0.55;
+  font-size: 12px;
+  line-height: 2;
+}
+
+.empty-state kbd {
+  font-family: var(--font-mono);
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-size: 11px;
+}
+
+/* ── Editor view ─────────────────────────────────────────────────────────── */
+.editor-header {
+  display: flex;
+  align-items: center;
+  padding: 6px 6px 6px 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: transparent;
+  border: none;
+  color: var(--btn-bg);
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 500;
+  padding: 3px 8px 3px 4px;
+  border-radius: var(--radius);
+  transition: background 0.1s;
+}
+
+.btn-back:hover { background: var(--hover-bg); }
+.btn-back svg { width: 16px; height: 16px; }
+
+.code-ref {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 0 10px 12px;
+}
+
+.code-ref-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+  background: var(--code-bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.code-ref-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.5;
+  font-weight: 600;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.code-ref-location {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  opacity: 0.6;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.code-snippet {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-mono);
+  background: var(--code-bg);
+  padding: 8px 10px;
+  overflow-x: auto;
+  white-space: pre;
+  max-height: 80px;
+  line-height: 1.5;
+  unicode-bidi: plaintext;
+}
+
+.code-snippet[dir="rtl"] {
+  text-align: start;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 10px;
+  margin-bottom: 12px;
+}
+
+label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.6;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+input[type="text"],
+textarea {
+  background: var(--input-bg);
+  color: var(--input-fg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius);
+  padding: 6px 9px;
+  font-size: 13px;
+  font-family: inherit;
+  width: 100%;
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.15s;
+}
+
+input[type="text"][dir="rtl"],
+textarea[dir="rtl"] {
+  text-align: start;
+}
+
+input[type="text"]:focus,
+textarea:focus { border-color: var(--input-focus); }
+
+textarea { line-height: 1.5; min-height: 100px; }
+
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.image-thumb {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  aspect-ratio: 4/3;
+  background: var(--code-bg);
+}
+
+.image-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  cursor: pointer;
+}
+
+.image-thumb .remove-btn {
+  position: absolute;
+  top: 2px;
+  inset-inline-end: 2px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.55);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+  color: #fff;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.image-thumb:hover .remove-btn { opacity: 1; }
+
+.image-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: var(--btn2-bg);
+  color: var(--btn2-fg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.btn-upload svg { width: 12px; height: 12px; }
+.btn-upload:hover { background: var(--btn2-hover); }
+
+.paste-hint { font-size: 11px; opacity: 0.5; }
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 10px 0;
+  border-top: 1px solid var(--border);
+}
+
+.btn-cancel {
+  padding: 5px 14px;
+  background: var(--btn2-bg);
+  color: var(--btn2-fg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.btn-cancel:hover { background: var(--btn2-hover); }
+
+.btn-save {
+  padding: 5px 16px;
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+
+.btn-save:hover { background: var(--btn-hover); }

@@ -1,0 +1,136 @@
+{
+  "name": "devnote",
+  "displayName": "DevNote",
+  "description": "Attach rich notes to any line of code",
+  "version": "0.1.0",
+  "publisher": "mortezadalil",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mortezadalil/DevNote.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mortezadalil/DevNote/issues"
+  },
+  "homepage": "https://github.com/mortezadalil/DevNote",
+  "keywords": [
+    "notes",
+    "annotations",
+    "comments",
+    "sidebar",
+    "markdown",
+    "rtl",
+    "persian",
+    "arabic"
+  ],
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "devnote.writeNote",
+        "title": "Write Note",
+        "category": "DevNote"
+      },
+      {
+        "command": "devnote.openNoteForLine",
+        "title": "Open Note",
+        "category": "DevNote"
+      },
+      {
+        "command": "devnote.deleteNote",
+        "title": "Delete Note",
+        "category": "DevNote"
+      },
+      {
+        "command": "devnote.navigateToNote",
+        "title": "Go to Line",
+        "category": "DevNote"
+      },
+      {
+        "command": "devnote.editNote",
+        "title": "Edit Note",
+        "category": "DevNote",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "devnote.newNoteFromSelection",
+        "title": "New Note from Selection",
+        "category": "DevNote",
+        "icon": "$(add)"
+      },
+      {
+        "command": "devnote.refresh",
+        "title": "Refresh",
+        "category": "DevNote",
+        "icon": "$(refresh)"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "devnote.writeNote",
+          "group": "devnote@1",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "devnote.openNoteForLine",
+          "group": "devnote@2",
+          "when": "devnote.lineHasNote"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "devnote.newNoteFromSelection",
+          "when": "view == devnote.sidebar",
+          "group": "navigation@1"
+        },
+        {
+          "command": "devnote.refresh",
+          "when": "view == devnote.sidebar",
+          "group": "navigation@2"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "devnote",
+          "title": "DevNote",
+          "icon": "media/devnote-activity.svg"
+        }
+      ]
+    },
+    "views": {
+      "devnote": [
+        {
+          "id": "devnote.sidebar",
+          "name": "Notes",
+          "type": "webview"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "devnote.writeNote",
+        "key": "ctrl+shift+n",
+        "mac": "cmd+shift+n",
+        "when": "editorHasSelection"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pack": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.2.2",
+    "typescript": "^5.3.0"
+  }
+}

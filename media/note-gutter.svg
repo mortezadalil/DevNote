@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" aria-hidden="true">
+  <!-- Pencil in gutter (left of line number when glyph margin is on); VS Code–style blue -->
+  <path fill="#007ACC" d="M12.7 1.3c.3-.3.8-.3 1.1 0l1 1c.3.3.3.8 0 1.1L5.5 12.7 2 14l1.3-3.5L12.7 1.3z"/>
+  <path fill="#005A9E" d="M2 14l2.3-.6-1.7-1.7L2 14z"/>
+</svg>
