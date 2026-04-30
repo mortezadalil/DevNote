@@ -49,6 +49,19 @@ export class DecorationProvider {
     editor.setDecorations(this.decorationType, decorations);
   }
 
+  /** Short whole-line highlight so the user sees which line the note is on after navigating from the list. */
+  flashNoteLine(editor: vscode.TextEditor, line: number): void {
+    const maxLine = editor.document.lineCount - 1;
+    const L = Math.min(Math.max(0, line), maxLine);
+    const range = editor.document.lineAt(L).range;
+    const flash = vscode.window.createTextEditorDecorationType({
+      isWholeLine: true,
+      backgroundColor: new vscode.ThemeColor('editor.findMatchHighlightBackground'),
+    });
+    editor.setDecorations(flash, [{ range }]);
+    setTimeout(() => flash.dispose(), 800);
+  }
+
   refreshAll(): void {
     for (const editor of vscode.window.visibleTextEditors) {
       this.updateDecorations(editor);

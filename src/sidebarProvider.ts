@@ -3,6 +3,7 @@ import * as path from 'path';
 import { NoteManager, Note } from './noteManager';
 import { DecorationProvider } from './decorationProvider';
 import { openNoteImage } from './openNoteImage';
+import { revealNoteAnchorInWorkspace } from './noteNavigation';
 
 export interface EditorInput {
   filePath: string;
@@ -209,12 +210,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   private async _navigateTo(filePath: string, line: number): Promise<void> {
     const ws = this.noteManager.getWorkspaceRoot();
     if (!ws) return;
-    const uri = vscode.Uri.file(path.join(ws, filePath));
-    const doc = await vscode.workspace.openTextDocument(uri);
-    const editor = await vscode.window.showTextDocument(doc, { preview: false });
-    const pos = new vscode.Position(line, 0);
-    editor.selection = new vscode.Selection(pos, pos);
-    editor.revealRange(new vscode.Range(pos, pos), vscode.TextEditorRevealType.InCenter);
+    await revealNoteAnchorInWorkspace(ws, filePath, line, this.decorationProvider);
   }
 
   private getHtml(webview: vscode.Webview): string {

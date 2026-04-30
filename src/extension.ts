@@ -4,6 +4,7 @@ import { NoteManager } from './noteManager';
 import { DecorationProvider } from './decorationProvider';
 import { NoteCodeLensProvider } from './codeLensProvider';
 import { SidebarProvider } from './sidebarProvider';
+import { revealNoteAnchorInWorkspace } from './noteNavigation';
 
 export function activate(context: vscode.ExtensionContext): void {
   const noteManager        = new NoteManager(context);
@@ -107,12 +108,7 @@ export function activate(context: vscode.ExtensionContext): void {
       async (filePath: string, line: number) => {
         const ws = noteManager.getWorkspaceRoot();
         if (!ws) return;
-        const uri    = vscode.Uri.file(path.join(ws, filePath));
-        const doc    = await vscode.workspace.openTextDocument(uri);
-        const editor = await vscode.window.showTextDocument(doc, { preview: false });
-        const pos    = new vscode.Position(line, 0);
-        editor.selection = new vscode.Selection(pos, pos);
-        editor.revealRange(new vscode.Range(pos, pos), vscode.TextEditorRevealType.InCenter);
+        await revealNoteAnchorInWorkspace(ws, filePath, line, decorationProvider);
       }
     )
   );
