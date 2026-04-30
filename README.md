@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/mortezadalil/DevNote/main/devNote.jpg" alt="DevNote — Notes in your code" width="200" />
+  <img src="./devNote.png" alt="DevNote — Notes in your code" width="200" />
 </p>
 
 <h1 align="center">DevNote</h1>
@@ -51,7 +51,7 @@
 | | |
 |:--|:--|
 | **Line-anchored notes** | Each note is tied to a file path and line number; line positions adjust when you insert or delete lines above them. |
-| **Rich editor** | Title, multi-line note body, and an inline preview of the **selected code** you attached the note to. |
+| **Rich editor** | Title, multi-line note body, and an inline preview of the **selected code** you attached the note to. A **Markdown toolbar** adds bold, italic, inline code (backticks), headings H1–H3, and bullet lines. |
 | **Sidebar “Notes”** | Browse every note grouped by file; navigate to code; edit or delete from the list (actions appear on hover). |
 | **Editor gutter** | A **pencil** icon in the **glyph margin** (beside line numbers) marks lines that have a note. |
 | **Code Lens** | The note title appears above noted lines for quick context. |
@@ -98,7 +98,7 @@
 
 - Click the **DevNote** icon on the left to open the **Notes** view.
 - Use **+** (next to **Refresh**) to start a **new** note from the **current selection** in the active editor.
-- Use **Refresh** if you changed `.DevNote` on disk outside VS Code.
+- Use **Refresh** if you changed `.devNote` on disk outside VS Code.
 
 ### From the editor
 
@@ -135,15 +135,15 @@ You can change shortcuts in **File → Preferences → Keyboard Shortcuts** and 
 
 ## Where data is stored
 
-Everything lives under **`<your-workspace>/.DevNote/`**:
+Everything lives under **`<your-workspace>/.devNote/`**. If you previously used **`.DevNote`** (capital **D**), the extension **renames that folder to `.devNote`** the next time it loads your notes (same contents; one-time migration).
 
 | Path | Content |
 |------|---------|
-| `.DevNote/config.json` | Index of notes (file, line, title, image list, etc.) |
-| `.DevNote/notes/*.md` | Note bodies (Markdown files) |
-| `.DevNote/images/*` | Attached images |
+| `.devNote/config.json` | Index of notes (file, line, title, image list, etc.) |
+| `.devNote/notes/*.md` | Note bodies (Markdown files) |
+| `.devNote/images/*` | Attached images |
 
-Add **`.DevNote/`** to `.gitignore` if notes are private, or **commit** it if your team should share them.
+Add **`.devNote/`** to `.gitignore` if notes are private, or **commit** it if your team should share them.
 
 ## Right-to-left text (Persian / Arabic)
 
@@ -160,7 +160,7 @@ Titles, note bodies, the code snippet panel, and sidebar titles use automatic di
 |-------|-------------|
 | **No pencil in the gutter** | Enable the glyph margin: **Settings** → search `editor.glyphMargin` → enable **Editor: Glyph Margin** (same area as breakpoints / lightbulb). |
 | **`+` does nothing** | Ensure a **file tab** is active, not only the sidebar; select **non-empty** text first. |
-| **Notes missing after clone** | `.DevNote` may not be in the repo; check [Where data is stored](#where-data-is-stored). |
+| **Notes missing after clone** | `.devNote` may not be in the repo; check [Where data is stored](#where-data-is-stored). |
 | **Wrong line after big edits** | Line tracking follows simple insert/delete; complex refactors may need you to re-open or move notes manually. |
 
 ## Development
