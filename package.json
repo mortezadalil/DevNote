@@ -2,7 +2,7 @@
   "name": "DevNotePro",
   "displayName": "DevNote Pro",
   "description": "Attach rich notes to any line of code",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "MortezaDalil",
   "license": "MIT",
   "repository": {
@@ -27,7 +27,7 @@
   "categories": ["Other"],
   "activationEvents": ["onStartupFinished"],
   "main": "./out/extension.js",
-  "icon": "media/store-icon.png",
+  "icon": "icon.png",
   "contributes": {
     "commands": [
       {
