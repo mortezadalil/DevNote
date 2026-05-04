@@ -8,6 +8,7 @@
   const fileInput = /** @type {HTMLInputElement} */ (document.getElementById('file-input'));
   const codeSnippet = /** @type {HTMLElement} */ (document.getElementById('code-snippet'));
   const fileLocation = /** @type {HTMLElement} */ (document.getElementById('file-location'));
+  const anchorBadge = /** @type {HTMLElement} */ (document.getElementById('anchor-unknown-badge'));
 
   /** @type {{ setDirectionFromText: (el: HTMLElement | null, text: unknown) => void }} */
   const Rtl = /** @type {*} */ (window).DevNoteRtl;
@@ -19,8 +20,13 @@
       titleEl.value = msg.title ?? '';
       contentEl.value = msg.content ?? '';
       codeSnippet.textContent = msg.selectedText || '(no selection)';
-      fileLocation.textContent = `${msg.filePath}:${msg.line}`;
+      fileLocation.textContent =
+        typeof msg.locationDisplay === 'string' ? msg.locationDisplay : `${msg.filePath}:${msg.line}`;
       fileLocation.setAttribute('dir', 'ltr');
+      if (anchorBadge) {
+        if (msg.anchorUnknownReference) anchorBadge.removeAttribute('hidden');
+        else anchorBadge.setAttribute('hidden', '');
+      }
       Rtl.setDirectionFromText(titleEl, titleEl.value);
       Rtl.setDirectionFromText(contentEl, contentEl.value);
       Rtl.setDirectionFromText(codeSnippet, codeSnippet.textContent);
@@ -143,4 +149,10 @@
     wrap.appendChild(btn);
     imagesGrid.appendChild(wrap);
   }
+
+  const mdToolbar = document.getElementById('note-md-toolbar');
+  const Tbar = /** @type {{ bind?: (a: HTMLElement | null, b: HTMLTextAreaElement | null) => void }} */ (
+    /** @type {*} */ (window).DevNoteNoteToolbar
+  );
+  if (Tbar?.bind) Tbar.bind(mdToolbar, contentEl);
 })();

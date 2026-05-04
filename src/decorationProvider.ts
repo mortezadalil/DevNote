@@ -27,13 +27,15 @@ export class DecorationProvider {
     const notes = this.noteManager.getNotesForFile(filePath);
     const maxLine = editor.document.lineCount - 1;
 
-    const decorations: vscode.DecorationOptions[] = notes.map(note => {
-      const line = Math.min(note.line, maxLine);
+    const decorations: vscode.DecorationOptions[] = notes
+      .filter(note => note.anchorUnknownReference !== true)
+      .map(note => {
+      const line = Math.min(Math.max(0, note.line), maxLine);
       const range = new vscode.Range(line, 0, line, 0);
 
       // Hover over gutter shows a clickable markdown link
-      const md = new vscode.MarkdownString(
-        `**📝 ${note.title || 'Note'}**\n\n` +
+        const md = new vscode.MarkdownString(
+          `**📝 ${note.title || 'Note'}**\n\n` +
         (note.selectedText
           ? `\`\`\`\n${note.selectedText.slice(0, 120)}\n\`\`\`\n\n`
           : '') +
@@ -56,6 +58,18 @@ export class DecorationProvider {
     const range = editor.document.lineAt(L).range;
     const flash = vscode.window.createTextEditorDecorationType({
       isWholeLine: true,
+      backgroundColor: new vscode.ThemeColor('editor.findMatchHighlightBackground'),
+    });
+    editor.setDecorations(flash, [{ range }]);
+    setTimeout(() => flash.dispose(), 800);
+  }
+
+  flashWholeDocument(editor: vscode.TextEditor): void {
+    const doc = editor.document;
+    const lastIdx = doc.lineCount - 1;
+    if (lastIdx < 0) return;
+    const range = new vscode.Range(new vscode.Position(0, 0), doc.lineAt(lastIdx).range.end);
+    const flash = vscode.window.createTextEditorDecorationType({
       backgroundColor: new vscode.ThemeColor('editor.findMatchHighlightBackground'),
     });
     editor.setDecorations(flash, [{ range }]);

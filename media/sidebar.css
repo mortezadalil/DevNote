@@ -249,6 +249,52 @@ body {
   unicode-bidi: isolate;
 }
 
+.code-ref-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  max-width: 72%;
+  text-align: end;
+}
+
+.anchor-unknown-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--vscode-editorWarning-foreground);
+  opacity: 0.95;
+  letter-spacing: 0.02em;
+}
+
+.anchor-unknown-badge[hidden] {
+  display: none !important;
+}
+
+.note-ref-unknown {
+  display: inline-block;
+  margin-inline-start: 8px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--vscode-editorWarning-foreground);
+  background: rgba(241, 194, 50, 0.12);
+  vertical-align: middle;
+}
+
+.note-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px;
+  width: 100%;
+}
+
+.note-title-row .note-title {
+  flex: 1;
+  min-width: 0;
+}
+
 .code-snippet {
   font-family: var(--font-mono);
   font-size: var(--font-size-mono);

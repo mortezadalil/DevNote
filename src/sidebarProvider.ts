@@ -12,6 +12,11 @@ export interface EditorInput {
   existingNote?: Note;
 }
 
+function sidebarCodeRefLocation(input: EditorInput): string {
+  if (input.existingNote?.anchorUnknownReference === true) return input.filePath;
+  return `${input.filePath}:${input.line + 1}`;
+}
+
 export class SidebarProvider implements vscode.WebviewViewProvider {
   static readonly viewId = 'devnote.sidebar';
 
@@ -198,7 +203,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       selectedText: input.selectedText,
       filePath: input.filePath,
       line: input.line + 1,
+      locationDisplay: sidebarCodeRefLocation(input),
       images,
+      anchorUnknownReference: input.existingNote?.anchorUnknownReference === true,
     });
   }
 
@@ -217,8 +224,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     const cssUri = webview.asWebviewUri(
       vscode.Uri.file(path.join(this.context.extensionPath, 'media', 'sidebar.css'))
     );
+    const toolbarCssUri = webview.asWebviewUri(
+      vscode.Uri.file(path.join(this.context.extensionPath, 'media', 'note-text-toolbar.css'))
+    );
     const rtlUri = webview.asWebviewUri(
       vscode.Uri.file(path.join(this.context.extensionPath, 'media', 'rtl-utils.js'))
+    );
+    const toolbarJsUri = webview.asWebviewUri(
+      vscode.Uri.file(path.join(this.context.extensionPath, 'media', 'note-text-toolbar.js'))
     );
     const jsUri = webview.asWebviewUri(
       vscode.Uri.file(path.join(this.context.extensionPath, 'media', 'sidebar.js'))
@@ -238,6 +251,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   <meta http-equiv="Content-Security-Policy" content="${csp}" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="${cssUri}" />
+  <link rel="stylesheet" href="${toolbarCssUri}" />
 </head>
 <body>
 
@@ -263,7 +277,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     <div class="code-ref">
       <div class="code-ref-bar">
         <span class="code-ref-label">Code reference</span>
-        <span class="code-ref-location" id="file-location"></span>
+        <span class="code-ref-meta">
+          <span class="code-ref-location" id="file-location"></span>
+          <span class="anchor-unknown-badge" id="anchor-unknown-badge" hidden>Unknown reference</span>
+        </span>
       </div>
       <pre class="code-snippet" id="code-snippet"></pre>
     </div>
@@ -275,6 +292,17 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     <div class="field">
       <label for="note-content">Note</label>
+      <div class="note-md-toolbar" id="note-md-toolbar" role="toolbar" aria-label="Markdown formatting">
+        <button type="button" class="md-btn" data-md="bold" title="Bold"><strong>B</strong></button>
+        <button type="button" class="md-btn" data-md="italic" title="Italic"><em>I</em></button>
+        <button type="button" class="md-btn" data-md="code" title="Inline code"><span style="font-family:var(--font-mono);">&#96;</span></button>
+        <span class="md-toolbar-sep" aria-hidden="true"></span>
+        <button type="button" class="md-btn" data-md="h1" title="Heading 1">H1</button>
+        <button type="button" class="md-btn" data-md="h2" title="Heading 2">H2</button>
+        <button type="button" class="md-btn" data-md="h3" title="Heading 3">H3</button>
+        <span class="md-toolbar-sep" aria-hidden="true"></span>
+        <button type="button" class="md-btn" data-md="bullet" title="Bullet list">•</button>
+      </div>
       <textarea id="note-content" placeholder="Write your note here…" rows="6"></textarea>
     </div>
 
@@ -303,6 +331,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   </div>
 
   <script nonce="${nonce}" src="${rtlUri}"></script>
+  <script nonce="${nonce}" src="${toolbarJsUri}"></script>
   <script nonce="${nonce}" src="${jsUri}"></script>
 </body>
 </html>`;

@@ -4,21 +4,79 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import { workspaceRelativePathsMatch } from './resolveNoteFilePath';
 
+/** Workspace folder for notes (lowercase d). Legacy `.DevNote` is migrated on load. */
+export const DEVNOTE_FOLDER = '.devNote';
+const LEGACY_DEVNOTE_FOLDER = '.DevNote';
+
+function migrateLegacyDevNoteFolder(root: string): void {
+  try {
+    const entries = fs.readdirSync(root, { withFileTypes: true });
+    const dirs = entries.filter(e => e.isDirectory()).map(e => e.name);
+    const hasLegacy = dirs.includes(LEGACY_DEVNOTE_FOLDER);
+    const hasNew = dirs.includes(DEVNOTE_FOLDER);
+    if (!hasLegacy) return;
+
+    const oldPath = path.join(root, LEGACY_DEVNOTE_FOLDER);
+    const newPath = path.join(root, DEVNOTE_FOLDER);
+
+    if (hasNew) {
+      try {
+        const sa = fs.statSync(oldPath);
+        const sb = fs.statSync(newPath);
+        if (sa.ino === sb.ino && sa.dev === sb.dev) return;
+      } catch {
+        return;
+      }
+      return;
+    }
+
+    const tmp = path.join(root, `.devnote_migrate_${process.pid}_${Date.now()}`);
+    fs.renameSync(oldPath, tmp);
+    fs.renameSync(tmp, newPath);
+  } catch {
+    /* ignore: permissions, locked folder, case-only rename edge cases */
+  }
+}
+
+/** Sentinel: no code line anchor (unknown reference). */
+export const UNKNOWN_NOTE_LINE = -1;
+
 export interface Note {
   id: string;
   fileRelativePath: string;
-  line: number;           // 0-indexed
+  line: number; // 0-based; UNKNOWN_NOTE_LINE when anchorUnknownReference
   selectedText: string;
   title: string;
-  noteFile: string;       // filename inside .DevNote/notes/
-  images: string[];       // filenames inside .DevNote/images/
+  noteFile: string; // filename inside .devNote/notes/
+  images: string[]; // filenames inside .devNote/images/
   createdAt: string;
   updatedAt: string;
+  /** True when the original code range was removed; no line anchor (UNKNOWN_NOTE_LINE); UI shows "Unknown reference". */
+  anchorUnknownReference?: boolean;
 }
 
 interface DevNoteConfig {
   version: string;
   notes: Note[];
+}
+
+/** Whether the saved selection text still appears on consecutive lines starting at `line`. */
+export function snippetMatchesDocument(
+  doc: vscode.TextDocument,
+  line: number,
+  selectedText: string
+): boolean {
+  if (line < 0) return false;
+  if (!selectedText.trim()) return true;
+  const parts = selectedText.split('\n');
+  for (let j = 0; j < parts.length; j++) {
+    const li = line + j;
+    if (li < 0 || li >= doc.lineCount) return false;
+    const want = parts[j].trim();
+    if (!want) continue;
+    if (!doc.lineAt(li).text.includes(want)) return false;
+  }
+  return true;
 }
 
 export class NoteManager {
@@ -37,7 +95,7 @@ export class NoteManager {
 
   getDevNoteDir(): string | null {
     const root = this.getWorkspaceRoot();
-    return root ? path.join(root, '.DevNote') : null;
+    return root ? path.join(root, DEVNOTE_FOLDER) : null;
   }
 
   private ensureDirs(): string {
@@ -55,6 +113,8 @@ export class NoteManager {
   }
 
   loadConfig(): void {
+    const root = this.getWorkspaceRoot();
+    if (root) migrateLegacyDevNoteFolder(root);
     const p = this.configPath();
     if (!p || !fs.existsSync(p)) {
       this.config = { version: '1.0', notes: [] };
@@ -62,6 +122,9 @@ export class NoteManager {
     }
     try {
       this.config = JSON.parse(fs.readFileSync(p, 'utf-8'));
+      for (const n of this.config.notes) {
+        if (n.anchorUnknownReference) n.line = UNKNOWN_NOTE_LINE;
+      }
     } catch {
       this.config = { version: '1.0', notes: [] };
     }
@@ -145,6 +208,7 @@ export class NoteManager {
       images,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      anchorUnknownReference: false,
     };
 
     const mdContent = `# ${title}\n\n${content}`;
@@ -218,9 +282,10 @@ export class NoteManager {
     return fs.existsSync(p) ? p : null;
   }
 
-  // Called by onDidChangeTextDocument — shifts note lines when code is inserted/deleted
+  // Called by onDidChangeTextDocument — updates anchors; unknown → UNKNOWN_NOTE_LINE, no gutter line
   handleDocumentChange(event: vscode.TextDocumentChangeEvent): void {
-    const filePath = vscode.workspace.asRelativePath(event.document.uri);
+    const doc = event.document;
+    const filePath = vscode.workspace.asRelativePath(doc.uri);
     const root = this.getWorkspaceRoot();
     if (!root) return;
     const notes = this.config.notes.filter(n =>
@@ -229,20 +294,48 @@ export class NoteManager {
     if (notes.length === 0) return;
 
     let changed = false;
-    for (const change of event.contentChanges) {
-      const changeStartLine = change.range.start.line;
-      const changeEndLine = change.range.end.line;
-      const addedLines = (change.text.match(/\n/g) ?? []).length;
-      const removedLines = changeEndLine - changeStartLine;
-      const delta = addedLines - removedLines;
 
-      if (delta !== 0) {
-        for (const note of notes) {
-          if (note.line > changeStartLine) {
-            note.line = Math.max(0, note.line + delta);
+    for (const change of event.contentChanges) {
+      const s = change.range.start.line;
+      const e = change.range.end.line;
+      const insertedNL = (change.text.match(/\n/g) ?? []).length;
+      const removedSpanLines = e - s;
+      const delta = insertedNL - removedSpanLines;
+
+      for (const note of notes) {
+        if (note.anchorUnknownReference) {
+          note.line = UNKNOWN_NOTE_LINE;
+          continue;
+        }
+
+        const L = note.line;
+
+        if (removedSpanLines > 0 && L >= s && L < e) {
+          note.line = UNKNOWN_NOTE_LINE;
+          note.anchorUnknownReference = true;
+          changed = true;
+          continue;
+        }
+
+        if (L >= e) {
+          const newL = L + delta;
+          if (newL !== L) {
+            note.line = Math.max(0, newL);
             changed = true;
           }
         }
+      }
+    }
+
+    for (const note of notes) {
+      if (note.anchorUnknownReference) {
+        note.line = UNKNOWN_NOTE_LINE;
+        continue;
+      }
+      if (!snippetMatchesDocument(doc, note.line, note.selectedText)) {
+        note.line = UNKNOWN_NOTE_LINE;
+        note.anchorUnknownReference = true;
+        changed = true;
       }
     }
 

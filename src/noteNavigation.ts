@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
 import type { DecorationProvider } from './decorationProvider';
 import { resolveNoteFileAbsolutePath } from './resolveNoteFilePath';
+import { UNKNOWN_NOTE_LINE } from './noteManager';
 
 /**
- * Opens the workspace file (if needed), reveals the note line, flashes it briefly, refreshes gutter.
- * Use when navigating from the sidebar webview so the editor group gets focus.
+ * Opens the workspace file (if needed), flashes anchor line or entire file when unknown,
+ * refreshes gutter. Unknown notes (@see UNKNOWN_NOTE_LINE) only open the file and flash whole document.
  */
 export async function revealNoteAnchorInWorkspace(
   workspaceRoot: string,
@@ -25,6 +26,12 @@ export async function revealNoteAnchorInWorkspace(
     const doc = await vscode.workspace.openTextDocument(uri);
     const editor = await vscode.window.showTextDocument(doc, { preview: false });
     await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
+
+    if (line === UNKNOWN_NOTE_LINE) {
+      decorationProvider.flashWholeDocument(editor);
+      decorationProvider.updateDecorations(editor);
+      return;
+    }
 
     const maxLine = doc.lineCount - 1;
     const L = Math.min(Math.max(0, line), maxLine);

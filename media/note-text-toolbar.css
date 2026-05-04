@@ -1,0 +1,39 @@
+/* Shared: markdown shortcuts above note body */
+.note-md-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  background: var(--vscode-sideBar-background, var(--vscode-editor-background));
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 6px);
+}
+
+.note-md-toolbar .md-btn {
+  min-width: 28px;
+  height: 26px;
+  padding: 0 8px;
+  font-size: 11px;
+  font-family: inherit;
+  line-height: 1;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--btn-secondary-bg, rgba(128, 128, 128, 0.12));
+  color: var(--fg, inherit);
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.note-md-toolbar .md-btn:hover {
+  background: var(--btn-secondary-hover, rgba(128, 128, 128, 0.22));
+}
+
+.note-md-toolbar .md-toolbar-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+  margin: 0 2px;
+  flex-shrink: 0;
+}

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { NoteManager } from './noteManager';
 
-/** Opens a note attachment from `.DevNote/images/` in an editor tab (image preview). */
+/** Opens a note attachment from `.devNote/images/` in an editor tab (image preview). */
 export async function openNoteImage(noteManager: NoteManager, filename: string): Promise<void> {
   const fsPath = noteManager.getImageFsPath(filename);
   if (!fsPath) {

@@ -38,8 +38,14 @@
         titleEl.value    = msg.title   ?? '';
         contentEl.value  = msg.content ?? '';
         codeSnippet.textContent = msg.selectedText || '(no selection)';
-        fileLocation.textContent = `${msg.filePath}:${msg.line}`;
+        fileLocation.textContent =
+          typeof msg.locationDisplay === 'string' ? msg.locationDisplay : `${msg.filePath}:${msg.line}`;
         fileLocation.setAttribute('dir', 'ltr');
+        const sideBadge = /** @type {HTMLElement} */ (document.getElementById('anchor-unknown-badge'));
+        if (sideBadge) {
+          if (msg.anchorUnknownReference) sideBadge.removeAttribute('hidden');
+          else sideBadge.setAttribute('hidden', '');
+        }
         Rtl.setDirectionFromText(titleEl, titleEl.value);
         Rtl.setDirectionFromText(contentEl, contentEl.value);
         Rtl.setDirectionFromText(codeSnippet, codeSnippet.textContent);
@@ -102,9 +108,14 @@
     item.innerHTML =
       `<div class="note-main">` +
         `<div class="note-info">` +
+        `<div class="note-title-row">` +
           `<span class="note-title">${esc(note.title || 'Untitled note')}</span>` +
-          `<span class="note-line" dir="ltr">Line ${note.line + 1}</span>` +
+          (note.anchorUnknownReference
+            ? `<span class="note-ref-unknown" title="Original code range was deleted">Unknown reference</span>`
+            : '') +
         `</div>` +
+        `<span class="note-line" dir="ltr">${note.anchorUnknownReference ? '(no code anchor)' : `Line ${note.line + 1}`}</span>` +
+      `</div>` +
       `</div>` +
       `<div class="note-actions">` +
         `<button class="icon-btn edit-btn" title="Edit note">` +
@@ -218,6 +229,12 @@
       .replace(/&/g, '&amp;').replace(/</g, '&lt;')
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
+
+  const mdToolbar = document.getElementById('note-md-toolbar');
+  const Tbar = /** @type {{ bind?: (a: HTMLElement | null, b: HTMLTextAreaElement | null) => void }} */ (
+    /** @type {*} */ (window).DevNoteNoteToolbar
+  );
+  if (Tbar?.bind) Tbar.bind(mdToolbar, contentEl);
 
   // ── Boot ──────────────────────────────────────────────────────────────────
   vscode.postMessage({ type: 'ready' });

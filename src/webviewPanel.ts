@@ -4,12 +4,18 @@ import { NoteManager, Note } from './noteManager';
 import { DecorationProvider } from './decorationProvider';
 import { openNoteImage } from './openNoteImage';
 import { resolveNoteFileAbsolutePath } from './resolveNoteFilePath';
+import { revealNoteAnchorInWorkspace } from './noteNavigation';
 
 interface PanelInput {
   filePath: string;
   line: number;            // 0-indexed
   selectedText: string;
   existingNote?: Note;
+}
+
+function panelCodeRefLocation(input: PanelInput): string {
+  if (input.existingNote?.anchorUnknownReference === true) return input.filePath;
+  return `${input.filePath}:${input.line + 1}`;
 }
 
 export class NoteWebviewPanel {
@@ -122,17 +128,8 @@ export class NoteWebviewPanel {
             decorationProvider.refreshAll();
             onSaved();
             this.panel.dispose();
-            // Navigate to the noted line
             const ws = noteManager.getWorkspaceRoot();
-            if (ws) {
-              const abs = resolveNoteFileAbsolutePath(ws, note.fileRelativePath);
-              if (abs) {
-                const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(abs));
-                const ed = await vscode.window.showTextDocument(doc);
-                const pos = new vscode.Position(note.line, 0);
-                ed.revealRange(new vscode.Range(pos, pos), vscode.TextEditorRevealType.InCenter);
-              }
-            }
+            if (ws) await revealNoteAnchorInWorkspace(ws, note.fileRelativePath, note.line, decorationProvider);
             break;
           }
           case 'cancel': {
@@ -196,8 +193,10 @@ export class NoteWebviewPanel {
       content: existing ? noteManager.getNoteContent(existing) : '',
       selectedText: input.selectedText,
       filePath: input.filePath,
-      line: input.line + 1,  // display as 1-indexed
+      line: input.line + 1,
+      locationDisplay: panelCodeRefLocation(input),
       images,
+      anchorUnknownReference: existing?.anchorUnknownReference === true,
     });
   }
 
@@ -210,8 +209,14 @@ export class NoteWebviewPanel {
     const cssUri = webview.asWebviewUri(
       vscode.Uri.file(path.join(context.extensionPath, 'media', 'noteEditor.css'))
     );
+    const toolbarCssUri = webview.asWebviewUri(
+      vscode.Uri.file(path.join(context.extensionPath, 'media', 'note-text-toolbar.css'))
+    );
     const rtlUri = webview.asWebviewUri(
       vscode.Uri.file(path.join(context.extensionPath, 'media', 'rtl-utils.js'))
+    );
+    const toolbarJsUri = webview.asWebviewUri(
+      vscode.Uri.file(path.join(context.extensionPath, 'media', 'note-text-toolbar.js'))
     );
     const jsUri = webview.asWebviewUri(
       vscode.Uri.file(path.join(context.extensionPath, 'media', 'noteEditor.js'))
@@ -237,6 +242,7 @@ export class NoteWebviewPanel {
   <meta http-equiv="Content-Security-Policy" content="${csp}" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="${cssUri}" />
+  <link rel="stylesheet" href="${toolbarCssUri}" />
   <title>DevNote</title>
 </head>
 <body data-devnote-dir="${devNoteUri}">
@@ -253,7 +259,10 @@ export class NoteWebviewPanel {
     <div class="code-ref">
       <div class="code-ref-bar">
         <span class="code-ref-label">Code reference</span>
-        <span class="code-ref-location" id="file-location"></span>
+        <span class="code-ref-meta">
+          <span class="code-ref-location" id="file-location"></span>
+          <span class="anchor-unknown-badge" id="anchor-unknown-badge" hidden>Unknown reference</span>
+        </span>
       </div>
       <pre class="code-snippet" id="code-snippet"></pre>
     </div>
@@ -265,6 +274,17 @@ export class NoteWebviewPanel {
 
     <div class="field">
       <label for="note-content">Note</label>
+      <div class="note-md-toolbar" id="note-md-toolbar" role="toolbar" aria-label="Markdown formatting">
+        <button type="button" class="md-btn" data-md="bold" title="Bold"><strong>B</strong></button>
+        <button type="button" class="md-btn" data-md="italic" title="Italic"><em>I</em></button>
+        <button type="button" class="md-btn" data-md="code" title="Inline code"><span style="font-family:var(--font-mono);">&#96;</span></button>
+        <span class="md-toolbar-sep" aria-hidden="true"></span>
+        <button type="button" class="md-btn" data-md="h1" title="Heading 1">H1</button>
+        <button type="button" class="md-btn" data-md="h2" title="Heading 2">H2</button>
+        <button type="button" class="md-btn" data-md="h3" title="Heading 3">H3</button>
+        <span class="md-toolbar-sep" aria-hidden="true"></span>
+        <button type="button" class="md-btn" data-md="bullet" title="Bullet list">•</button>
+      </div>
       <textarea id="note-content" placeholder="Write your note here — markdown is supported…" rows="8"></textarea>
     </div>
 
@@ -292,6 +312,7 @@ export class NoteWebviewPanel {
 
   </div>
   <script nonce="${nonce}" src="${rtlUri}"></script>
+  <script nonce="${nonce}" src="${toolbarJsUri}"></script>
   <script nonce="${nonce}" src="${jsUri}"></script>
 </body>
 </html>`;

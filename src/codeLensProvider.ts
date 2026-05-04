@@ -14,15 +14,17 @@ export class NoteCodeLensProvider implements vscode.CodeLensProvider {
     const notes = this.noteManager.getNotesForFile(filePath);
     const maxLine = document.lineCount - 1;
 
-    return notes.map(note => {
-      const line = Math.min(note.line, maxLine);
-      const range = new vscode.Range(line, 0, line, 0);
-      return new vscode.CodeLens(range, {
-        title: `📝 ${note.title || 'Note'}`,
-        command: 'devnote.openNoteForLine',
-        arguments: [note.id],
+    return notes
+      .filter(note => note.anchorUnknownReference !== true)
+      .map(note => {
+        const line = Math.min(Math.max(0, note.line), maxLine);
+        const range = new vscode.Range(line, 0, line, 0);
+        return new vscode.CodeLens(range, {
+          title: `📝 ${note.title || 'Note'}`,
+          command: 'devnote.openNoteForLine',
+          arguments: [note.id],
+        });
       });
-    });
   }
 
   refresh(): void {
