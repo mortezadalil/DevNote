@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import type { DecorationProvider } from './decorationProvider';
 import { resolveNoteFileAbsolutePath } from './resolveNoteFilePath';
 import { UNKNOWN_NOTE_LINE } from './noteManager';
+import { workspaceDocumentUri } from './workspaceDocumentUri';
 
 /**
  * Opens the workspace file (if needed), flashes anchor line or entire file when unknown,
@@ -22,7 +23,7 @@ export async function revealNoteAnchorInWorkspace(
       );
       return;
     }
-    const uri = vscode.Uri.file(absolute);
+    const uri = workspaceDocumentUri(absolute);
     const doc = await vscode.workspace.openTextDocument(uri);
     const editor = await vscode.window.showTextDocument(doc, { preview: false });
     await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
@@ -43,8 +44,12 @@ export async function revealNoteAnchorInWorkspace(
     decorationProvider.updateDecorations(editor);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
+    const hint =
+      /50MB|synchronized with extensions/i.test(msg)
+        ? ' If the file is small, try opening it once from the Explorer, or add its folder as the workspace root.'
+        : '';
     await vscode.window.showErrorMessage(
-      `DevNote: could not open "${fileRelativePath}": ${msg}`
+      `DevNote: could not open "${fileRelativePath}": ${msg}${hint}`
     );
   }
 }

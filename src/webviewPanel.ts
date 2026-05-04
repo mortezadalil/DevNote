@@ -5,6 +5,8 @@ import { DecorationProvider } from './decorationProvider';
 import { openNoteImage } from './openNoteImage';
 import { resolveNoteFileAbsolutePath } from './resolveNoteFilePath';
 import { revealNoteAnchorInWorkspace } from './noteNavigation';
+import { workspaceDocumentUri } from './workspaceDocumentUri';
+import { openNoteMarkdownPreview } from './noteMarkdownPreview';
 
 interface PanelInput {
   filePath: string;
@@ -138,7 +140,8 @@ export class NoteWebviewPanel {
             if (ws) {
               const abs = resolveNoteFileAbsolutePath(ws, input.filePath);
               if (abs) {
-                vscode.workspace.openTextDocument(vscode.Uri.file(abs)).then(doc => {
+                const uri = workspaceDocumentUri(abs);
+                vscode.workspace.openTextDocument(uri).then(doc => {
                   vscode.window.showTextDocument(doc, { preview: false });
                 });
               }
@@ -166,6 +169,13 @@ export class NoteWebviewPanel {
             if (typeof msg.filename === 'string') {
               await openNoteImage(noteManager, msg.filename);
             }
+            break;
+          }
+          case 'openMarkdownPreview': {
+            const title = typeof msg.title === 'string' ? msg.title : '';
+            const markdown = typeof msg.markdown === 'string' ? msg.markdown : '';
+            const wrapPersianDoc = msg.wrapPersianDoc === true;
+            openNoteMarkdownPreview(context, noteManager, title, markdown, wrapPersianDoc);
             break;
           }
         }
@@ -220,6 +230,9 @@ export class NoteWebviewPanel {
     );
     const jsUri = webview.asWebviewUri(
       vscode.Uri.file(path.join(context.extensionPath, 'media', 'noteEditor.js'))
+    );
+    const previewHelpersUri = webview.asWebviewUri(
+      vscode.Uri.file(path.join(context.extensionPath, 'media', 'note-preview-helpers.js'))
     );
 
     const devNoteDir = noteManager.getDevNoteDir();
@@ -284,6 +297,9 @@ export class NoteWebviewPanel {
         <button type="button" class="md-btn" data-md="h3" title="Heading 3">H3</button>
         <span class="md-toolbar-sep" aria-hidden="true"></span>
         <button type="button" class="md-btn" data-md="bullet" title="Bullet list">•</button>
+        <span class="md-toolbar-sep" aria-hidden="true"></span>
+        <button type="button" class="md-btn md-btn-preview" id="btn-md-preview" title="Open Markdown preview in a separate editor tab">Preview</button>
+        <button type="button" class="md-btn md-btn-preview-rtl" id="btn-md-preview-rtl" title="Add Persian/RTL font and layout to the note, then preview">Preview RTL</button>
       </div>
       <textarea id="note-content" placeholder="Write your note here — markdown is supported…" rows="8"></textarea>
     </div>
@@ -312,6 +328,7 @@ export class NoteWebviewPanel {
 
   </div>
   <script nonce="${nonce}" src="${rtlUri}"></script>
+  <script nonce="${nonce}" src="${previewHelpersUri}"></script>
   <script nonce="${nonce}" src="${toolbarJsUri}"></script>
   <script nonce="${nonce}" src="${jsUri}"></script>
 </body>

@@ -172,6 +172,31 @@
 
   document.getElementById('btn-upload')?.addEventListener('click', () => fileInput.click());
 
+  document.getElementById('btn-md-preview')?.addEventListener('click', () => {
+    vscode.postMessage({
+      type: 'openMarkdownPreview',
+      title: titleEl.value.trim(),
+      markdown: contentEl.value,
+      wrapPersianDoc: false,
+    });
+  });
+
+  document.getElementById('btn-md-preview-rtl')?.addEventListener('click', () => {
+    const RtlHelpers = /** @type {{ ensurePrefix?: (s: string) => string }} */ (
+      /** @type {*} */ (window).DevNotePreviewRtl
+    );
+    if (RtlHelpers?.ensurePrefix) {
+      contentEl.value = RtlHelpers.ensurePrefix(contentEl.value);
+      Rtl.setDirectionFromText(contentEl, contentEl.value);
+    }
+    vscode.postMessage({
+      type: 'openMarkdownPreview',
+      title: titleEl.value.trim(),
+      markdown: contentEl.value,
+      wrapPersianDoc: true,
+    });
+  });
+
   titleEl.addEventListener('input', () => Rtl.setDirectionFromText(titleEl, titleEl.value));
   contentEl.addEventListener('input', () => Rtl.setDirectionFromText(contentEl, contentEl.value));
 

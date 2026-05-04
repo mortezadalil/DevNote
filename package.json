@@ -2,7 +2,7 @@
   "name": "DevNotePro",
   "displayName": "DevNote Pro",
   "description": "Attach rich notes to any line of code",
-  "version": "0.1.6",
+  "version": "0.1.9",
   "publisher": "MortezaDalil",
   "license": "MIT",
   "repository": {
@@ -28,9 +28,15 @@
     "persian",
     "arabic"
   ],
-  "engines": { "vscode": "^1.85.0" },
-  "categories": ["Other"],
-  "activationEvents": ["onStartupFinished"],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./out/extension.js",
   "icon": "icon.png",
   "contributes": {
@@ -138,5 +144,8 @@
     "@types/vscode": "^1.85.0",
     "@vscode/vsce": "^3.2.2",
     "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "marked": "^18.0.3"
   }
 }
